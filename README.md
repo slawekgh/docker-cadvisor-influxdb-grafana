@@ -348,3 +348,206 @@ ogólnie tak, ale:
 - Jednym słowem idea wydaje się być dobra (jest separacja, jest BuildShipRun), niestety realizacja koncepcji jest nieco utrudniona i nieelastyczna 
 
 
+
+## czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
+
+do repo dodajemy ponownie generyczny values z wpisanymi jakimiś random danymi:
+helm-chart-repo$ cat test-chart/values-generic.yaml 
+replicaCount: 1
+testerPodName: tester
+namespace: dev
+label: testlabel
+ala: alamakota
+servicePort : 1111
+PROTO : TCP
+targetPort : 8080
+obraz:
+  image: gimboo/nginx_nonroot
+  imagePolicy: Always
+
+jednak tym razem w tej metodzie zmienne replicaCount, servicePort oraz namespace będziemy nadpisywać 
+dostępne opcje dla argo app create:--helm-set stringArray                       Helm set values on the command line (can be repeated to set several values: --helm-set key1=val1 --helm-set key2=val2)
+--helm-set-file stringArray                  Helm set values from respective files specified via the command line (can be repeated to set several values: --helm-set-file key1=path1 --helm-set-file key2=path2)
+--helm-set-string stringArray                Helm set STRING values on the command line (can be repeated to set several values: --helm-set-string key1=val1 --helm-set-string key2=val2)
+--values stringArray                         Helm values file(s) to use
+
+
+tutaj użyjemy --helm-set a potem --values
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo list
+TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo add https://github.com/slawekgh/argo-helm
+Repository 'https://github.com/slawekgh/argo-helm' added
+
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app list
+NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
+
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=2 --helm-set servicePort=2222 --helm-set namespace=dev
+application 'argo-helm-dev' created
+
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app create argo-helm-test --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace test --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=3 --helm-set servicePort=3333 --helm-set namespace=test
+application 'argo-helm-test' created
+
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app create argo-helm-prod --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace prod --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=4 --helm-set servicePort=4444 --helm-set namespace=prod
+application 'argo-helm-prod' created
+
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app listNAME                   CLUSTER                         NAMESPACE  PROJECT  STATUS  HEALTH   SYNCPOLICY  CONDITIONS  REPO                                   PATH        TARGET
+argocd/argo-helm-dev   https://kubernetes.default.svc  dev        default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
+argocd/argo-helm-prod  https://kubernetes.default.svc  prod       default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
+argocd/argo-helm-test  https://kubernetes.default.svc  test       default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
+
+na GKE jest również zgodnie z założeniami:
+-----dev-------------
+NAME                                  READY   STATUS    RESTARTS   AGE
+test-release-deploy-7c9c7669c-8h498   1/1     Running   0          40s
+test-release-deploy-7c9c7669c-b2nxt   1/1     Running   0          40s
+NAME           TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
+test-release   ClusterIP   10.108.5.59   <none>        2222/TCP   41s
+-----test-------------
+NAME                                  READY   STATUS    RESTARTS   AGE
+test-release-deploy-7c9c7669c-jghr8   1/1     Running   0          18s
+test-release-deploy-7c9c7669c-jlmxw   1/1     Running   0          18s
+test-release-deploy-7c9c7669c-z46qx   1/1     Running   0          18s
+NAME           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+test-release   ClusterIP   10.108.11.61   <none>        3333/TCP   19s
+-----prod-------------
+NAME                                  READY   STATUS    RESTARTS   AGE
+test-release-deploy-7c9c7669c-55cg2   1/1     Running   0          5s
+test-release-deploy-7c9c7669c-t8dcm   1/1     Running   0          4s
+test-release-deploy-7c9c7669c-t8x5q   1/1     Running   0          4s
+test-release-deploy-7c9c7669c-z8mp5   1/1     Running   0          4s
+NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+test-release   ClusterIP   10.108.10.248   <none>        4444/TCP   6s
+
+
+SPEC argo-aplikacji wygląda następująco (tu na przykładzie argo-helm-dev) - zwracamy uwagę na sekcję parameters:
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2023-08-23T08:43:38Z"
+  generation: 14
+  name: argo-helm-dev
+  namespace: argocd
+  resourceVersion: "79461"
+  uid: aa96eae1-ff2d-4699-8aaa-6f382309413b
+spec:
+  destination:
+    namespace: dev
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      parameters:
+      - name: replicaCount
+        value: "2"
+      - name: servicePort
+        value: "2222"
+      - name: namespace
+        value: dev
+      releaseName: test-release
+      valueFiles:
+      - values-generic.yaml
+    path: test-chart
+    repoURL: https://github.com/slawekgh/argo-helm
+  syncPolicy:
+    automated:
+      prune: true
+
+oczywiście podobnie argo-app dla test i prod zawiera te parametry
+zalety - jest separacja środowisk PROD, DEV. TEST , jest też podział na część generyczną i część konfiguracyjną (czyli BuildShipRun jest w miarę spełniony) wady - trzymanie konfiguracji środowiska w parametrach argo-application , gdy zmiennych będą dziesiątki oczywiście raczej następujące podejście zupełnie się nie sprawdzi:
+argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=2 --helm-set servicePort=2222 --helm-set namespace=dev  --helm-set parametr1=xxx  --helm-set parametr2=xxx --helm-set parametr3=xxx --helm-set parametr4=xxx --helm-set parametr5=xxx --helm-set parametr6=xxx--helm-set parametr7=xxx  itd itd 
+
+jak również nie sprawdzi sie zarządzanie zmianami w konfiguracji w ten sposób:
+$ argocd app set argo-helm-dev -p replicaCount=8 
+$ argocd app set argo-helm-dev -p replicaCount=9 -p servicePort=9999 -p parametr1=xxx itd 
+
+wtedy jedyna opcja to zarządzanie argo-app z kodu , czyli trzymanie kodu argo-application dla dev, dla test i dla prod w repo i wgrywanie na klaster via kubectl apply -f (oczywiście via CICD, Jenkins lub inne argo-administracyjne-główne-nadrzędne) - wtedy pamiętać musimy że argo-application-dev.yaml zawiera już konfig dla DEV 
+jednym słowem konfiguracja środowiska jest trzymana w konfiguracji argo-app - jest to słabe rozwiązanie 
+dodatkowo w materiałach na YT jako wadę tego podejścia wskazuje się brak możliwości wywołania lokalnego helm install/upgrade (no bo values mamy w argo a nie w repo czy pod ręką w pliku) 
+
+
+## piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig
+
+rozwiązanie z umbrella-chart było prawie idealne gdyby nie było konieczności robienia prawdziwego helm-repository (opartego o serwujący pliki webserwer czy GCS itp) gdzie trafiają TGZy z chartami oraz trzeba generować index.yaml rozwiązanie ze zmiennymi nadpisywanymi przez argo-aplikacje też byłoby ok gdyby nie konieczność trzymania całego konfigu aplikacji w obiektachh argo (które nie do tego są)
+dlatego dobrym kompromisem wydaje się być model gdzie pozostajemy przy klasycznej koncepcji zwykłego repo kodu z głównym helm-chart ale dodawania do niego konfiguracji z innego repo 
+takie rozwiązanie jest ale jak na razie jest to rozwiązanie beta i weszło dopiero w ARGOCD 2.6 https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#helm-value-files-from-external-git-repository
+https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
+
+tu kluczowy fragment:
+before v2.6 of Argo CD, Values files must be in the same git repository as the Helm chart. The files can be in a different location in which case it can be accessed using a relative path relative to the root directory of the Helm chart. As of v2.6, values files can be sourced from a separate repository than the Helm chart by taking advantage of multiple sources for Applications.
+
+poza tym (być może z racji że to beta) mimo kilku prób nie udało mi się wykonać takiego setupu via argocd app create a jedynie definiując w YAMLu obiekty argo-Application - przynajmniej tak jest na dzień 23.08.2023 lub po prostu nie znalazłem na szybko sposobu 
+
+celujemy w setup:jako repo główne (repo helm-chartu) uzyjemy https://github.com/slawekgh/argo-helm/tree/main/test-chart
+jako repo konfugiracji dla środowiska DEV użyjemy repo: https://github.com/slawekgh/helm-argo-ship-dev
+oto struktura obydwu tych repo (pokazana w uproszczeniu , czyli z pominiętymi elementami które nie biorą udziały w tym setupie) :
+
+helm-chart-repo$ tree
+.
+├── README.md
+└── test-chart
+    ├── Chart.yaml
+    ├── templates
+    │   ├── configmap.yaml
+    │   ├── deployment.yaml
+    │   ├── NOTES.txt
+    │   ├── service.yaml
+    │   └── tests
+    │       └── test-connection.yaml
+
+
+ship-repo-dev$ tree
+.
+├── README.md
+└── values-dla-srodowiska-dev.yaml
+
+
+w ARGO mamy czystą sytuację:
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app list
+NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
+argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo list
+TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
+argocd@argocd-server-85f85d648b-tf2bx:~$
+
+Trzeba dodać obiekt argo-aplikacji który pracuje na dwóch repozytoriach jednocześnie aby ułatwić sobie zadanie można w argo dodać z ręki prostą aplikację:
+
+argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml
+
+i potem zrobić jej edycję via kk -n argocd edit application argo-helm-dev
+
+
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: "2023-08-23T12:12:59Z"
+  generation: 54
+  name: argo-helm-dev
+  namespace: argocd
+  resourceVersion: "183619"
+  uid: cb3998cf-4fe5-4fd9-bd45-50e38ac87298
+spec:
+  destination:
+    namespace: dev
+    server: https://kubernetes.default.svc
+  project: default
+  sources:
+  - helm:
+      releaseName: test-release
+      valueFiles:
+      - $values/values-dla-srodowiska-dev.yaml
+    path: test-chart
+    repoURL: https://github.com/slawekgh/argo-helm
+  - ref: values
+    repoURL: https://github.com/slawekgh/helm-argo-ship-dev
+  syncPolicy:
+    automated:
+      prune: true
+
+
+od tej pory konfigurację środowiska trzymamy wyłącznie w repo z konfigiem i zmiany (parametry) konfiguracyjne modyfikujemy wyłącznie w tym repo 
+celem wprowadzenia tego samego setupu dla TEST i PROD należy stworzyć identyczne repozytoria konfiguracyjne oraz dodać kolejne 2 aplikacje argo wskazujące na te repozytoria 
+
+
