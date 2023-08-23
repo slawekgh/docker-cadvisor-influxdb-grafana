@@ -233,7 +233,7 @@ https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index
 
 a zatem komuś kto będzie chiał używać tego helm-repository taką ścieżkę trzeba będzie podawać: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main
 
-zaś w helm-chartach które będą się odwoływać do tego helm-repository trzeba będzie na końcu ich Chart.yaml podawać: i
+zaś w helm-chartach które będą się odwoływać do tego helm-repository trzeba będzie na końcu ich Chart.yaml dodefiniować:
 ```
 dependencies:
 - name: test-chart
