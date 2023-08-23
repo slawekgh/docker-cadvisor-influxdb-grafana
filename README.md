@@ -329,12 +329,22 @@ test-release-deploy-7c9c7669c-vnxh9   1/1     Running   0          69s
 
 
 analogicznie obok repo-ship-dev (https://github.com/slawekgh/helm-argo-ship-dev) należy założyć identyczne osobne repo dla test i osobne dla prod 
+
+
 ich struktura będzie taka sama - mają tu być tylko dependency (w Chart.yaml) do helm-repository i values.yaml odpowiednie dla TEST i dla PROD 
+
+```
 ship-repo-dev$ tree
 ├── Chart.yaml
 ├── README.md
 └── values.yaml
+```
 
-czy rozwiązanie z umbrella-chart ma sens ? ogólnie tak, ale trzeba mu niestety dostarczyć "prawdziwe helm-repository" - czyli zamiast trzymać główny helm-chart w kodzie trzeba go za każdym razem pakować do TGZ i generować index.yaml , dodatkowo potrzebny jest web-serwer do serwowania tych plików.Jednym słowem idea wydaje się być dobra (jest separacja, jest BuildShipRun), niestety realizacja koncepcji jest nieco utrudniona i nieelastyczna 
+czy rozwiązanie z umbrella-chart ma sens ? 
+
+ogólnie tak, ale:
+- trzeba mu niestety dostarczyć "prawdziwe helm-repository" - czyli zamiast trzymać główny helm-chart w kodzie trzeba go za każdym razem pakować do TGZ i generować index.yaml
+- dodatkowo potrzebny jest web-serwer do serwowania tych plików
+- Jednym słowem idea wydaje się być dobra (jest separacja, jest BuildShipRun), niestety realizacja koncepcji jest nieco utrudniona i nieelastyczna 
 
 
