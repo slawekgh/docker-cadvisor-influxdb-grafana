@@ -15,7 +15,7 @@ Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane 
 - drugie rozwiązanie - 3 x repo z helm-chart
 - trzecie rozwiązanie - umbrella chart
 - czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
-- piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig  
+- piąte rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig  
 
 
   
@@ -494,7 +494,7 @@ jednym słowem konfiguracja środowiska jest trzymana w konfiguracji argo-app - 
 dodatkowo w materiałach na YT jako wadę tego podejścia wskazuje się brak możliwości wywołania lokalnego helm install/upgrade (no bo values mamy w argo a nie w repo czy pod ręką w pliku) 
 
 
-## piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart, drugie na konfig
+## piąte rozwiązanie - 2 osobne repozytoria - jedno na helm-chart, drugie na konfig
 
 rozwiązanie z umbrella-chart było prawie idealne gdyby nie następujące cechy:
 - konieczność robienia prawdziwego helm-repository (opartego o serwujący pliki webserwer czy GCS itp) 
