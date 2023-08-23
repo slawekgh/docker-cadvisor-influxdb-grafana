@@ -352,6 +352,8 @@ ogólnie tak, ale:
 ## czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
 
 do repo dodajemy ponownie generyczny values z wpisanymi jakimiś random danymi:
+
+```
 helm-chart-repo$ cat test-chart/values-generic.yaml 
 replicaCount: 1
 testerPodName: tester
@@ -364,15 +366,20 @@ targetPort : 8080
 obraz:
   image: gimboo/nginx_nonroot
   imagePolicy: Always
+```
 
 jednak tym razem w tej metodzie zmienne replicaCount, servicePort oraz namespace będziemy nadpisywać 
-dostępne opcje dla argo app create:--helm-set stringArray                       Helm set values on the command line (can be repeated to set several values: --helm-set key1=val1 --helm-set key2=val2)
+<br>
+
+dostępne opcje dla argo app create:
+```
+--helm-set stringArray                       Helm set values on the command line (can be repeated to set several values: --helm-set key1=val1 --helm-set key2=val2)
 --helm-set-file stringArray                  Helm set values from respective files specified via the command line (can be repeated to set several values: --helm-set-file key1=path1 --helm-set-file key2=path2)
 --helm-set-string stringArray                Helm set STRING values on the command line (can be repeated to set several values: --helm-set-string key1=val1 --helm-set-string key2=val2)
---values stringArray                         Helm values file(s) to use
+```
 
-
-tutaj użyjemy --helm-set a potem --values
+tutaj użyjemy --helm-set:
+```
 argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo list
 TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
 argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo add https://github.com/slawekgh/argo-helm
@@ -394,8 +401,12 @@ argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app listNAME             �
 argocd/argo-helm-dev   https://kubernetes.default.svc  dev        default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
 argocd/argo-helm-prod  https://kubernetes.default.svc  prod       default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
 argocd/argo-helm-test  https://kubernetes.default.svc  test       default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
+```
 
 na GKE jest również zgodnie z założeniami:
+
+
+```
 -----dev-------------
 NAME                                  READY   STATUS    RESTARTS   AGE
 test-release-deploy-7c9c7669c-8h498   1/1     Running   0          40s
@@ -417,9 +428,10 @@ test-release-deploy-7c9c7669c-t8x5q   1/1     Running   0          4s
 test-release-deploy-7c9c7669c-z8mp5   1/1     Running   0          4s
 NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
 test-release   ClusterIP   10.108.10.248   <none>        4444/TCP   6s
-
+```
 
 SPEC argo-aplikacji wygląda następująco (tu na przykładzie argo-helm-dev) - zwracamy uwagę na sekcję parameters:
+```
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -451,6 +463,7 @@ spec:
   syncPolicy:
     automated:
       prune: true
+```
 
 oczywiście podobnie argo-app dla test i prod zawiera te parametry
 zalety - jest separacja środowisk PROD, DEV. TEST , jest też podział na część generyczną i część konfiguracyjną (czyli BuildShipRun jest w miarę spełniony) wady - trzymanie konfiguracji środowiska w parametrach argo-application , gdy zmiennych będą dziesiątki oczywiście raczej następujące podejście zupełnie się nie sprawdzi:
