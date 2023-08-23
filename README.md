@@ -69,7 +69,7 @@ W rzeczywistych środowiskach różnice są inne i jest ich znacznie więcej - t
 Jednym słowem dążymy do modelu gdzie helm-chart jest jeden ale ma 3 różne metody wdrożenia - czyli upraszczając 3 różne pliki values (odpowiednio dla DEV, dla TEST i dla PROD)
 
 
-# pierwsze rozwiązanie - 1 repo z helm-chart a w nim 3 x values
+## pierwsze rozwiązanie - 1 repo z helm-chart a w nim 3 x values
 
 pierwsze intuicyjne (ale bardzo słabe) rozwiązanie jakie przychodzi do głowy to oczywiście dodać do repo 3 x plik Values i zdefiniować 3 aplikacje argo:
 
@@ -90,6 +90,8 @@ rozbijamy zatem w naszym repo values.yaml na 3 różne pliki 
 ```
 
 te values-X.yaml różnią się ilością replik i portami dla k8s-svc:
+
+```
 $ cat values-dev.yaml | grep -E "replicaCount|servicePort|namespace"
 replicaCount: 2
 namespace: dev
@@ -102,8 +104,11 @@ $ cat values-prod.yaml | grep -E "replicaCount|servicePort|namespace"
 replicaCount: 4
 namespace: prod
 servicePort : 4444
+```
 
-startujemy z czystym argo i dodajemy repo + 3 x argo-app
+startujemy z czystym argo i dodajemy repo + 3 x argo-app:
+
+```
 argocd@argocd-server-5fff657769-fhml5:~$ argocd repo list 
 TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
 argocd@argocd-server-5fff657769-fhml5:~$ argocd app list 
@@ -120,8 +125,11 @@ application 'argo-helm-test' created
 
 argocd@argocd-server-5fff657769-fhml5:~$ argocd app create argo-helm-prod --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace prod --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-prod.yaml
 application 'argo-helm-prod' created
+```
 
 po pewnym czasie wszystko wygląda na zgodne z założeniami, argo-apps się zsynchronizowały, zaś w każdym NS jest tyle podów ile miało być i k8s-svc są na tych portach na których miały być:
+
+```
 argocd@argocd-server-5fff657769-fhml5:~$ argocd app list 
 NAME                   CLUSTER                         NAMESPACE  PROJECT  STATUS  HEALTH   SYNCPOLICY  CONDITIONS  REPO                                   PATH        TARGET
 argocd/argo-helm-dev   https://kubernetes.default.svc  dev        default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/argo-helm  test-chart  
@@ -152,6 +160,7 @@ pod/test-release-deploy-7c9c7669c-zfhlb   1/1     Running   0          
 
 NAME                   TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
 service/test-release   ClusterIP   10.108.2.95   <none>        4444/TCP   2m27s
+```
 
 
 rozwiązanie to mimo że proste i działa od ręki to jednak jest skrajnie niedoskonałe - po pierwsze zakłada że repo z helm-chart należy do nas i możemy sobie do niego wrzucać swoje pliki (a tak może nie być, może go utrzymywać zupełnie inna osoba/grupa/firma/community) , po drugie burzy ideę BuildShipRun gdzie artefakt ma być generyczny i pozbawiony konfiguracji która to konfiguracja jest różna dla prod/test/dev oraz dogrywana podczas release na dev czy na prod, po trzecie uniemożliwia jakąkolwiek separację danych między PROD a resztą niższych środowisk , może np. dojść do sytuacji że developer robiący jakieś swoje poc na dev wrzuci omyłkowo coś do prod itd itp - rozwiązanie to zatem kompletnie odpada 
