@@ -9,7 +9,14 @@ BSR to w tym wypadku i w tym kontekście :
 
 
 
-Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts 
+Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts:
+
+- pierwsze rozwiązanie - 1 repo z helm-chart a w nim 3 x values
+- drugie rozwiązanie - 3 x repo z helm-chart
+- trzecie rozwiązanie - umbrella chart
+- czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
+- piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig
+
 
 
 
