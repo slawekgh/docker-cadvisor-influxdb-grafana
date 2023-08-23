@@ -214,9 +214,9 @@ _chart repository is really just an HTTP server that hosts an index.yaml file to
 
 trzeba zrobić TGZ oraz index.yaml 
 
-TGZ robimy via helm package test-chart
+TGZ robimy via ```helm package test-chart```
 
-INDEX.YAML via helm repo index .
+INDEX.YAML via ```helm repo index .   ```
 
 powstaje: 
 ```
