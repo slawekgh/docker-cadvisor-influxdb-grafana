@@ -1,9 +1,14 @@
 jak w nazwie repo - omawiamy tu próbę realizacji BuildShipRun dla tandemu argocd+helm 
 
-BSR to rozdział artefaktu generycznego od konfiguracji, artefakt generyczny ma być pozbawiony konfigiracji , konfiguracja per środowisko (prod, test, dev) ma być dostarczana wraz z release artefaktu. 
+BSR to w tym wypadku i w tym kontekście :
+
+- rozdział artefaktu generycznego od konfiguracji
+- artefakt generyczny ma być pozbawiony konfiguracji
+- konfiguracja per środowisko (prod, test, dev) ma być dostarczana wraz z release artefaktu. 
 
 
-przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts 
+
+Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts 
 
 
 
