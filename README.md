@@ -111,6 +111,7 @@ startujemy z czystym argo i dodajemy repo + 3 x argo-app:
 ```
 argocd@argocd-server-5fff657769-fhml5:~$ argocd repo list 
 TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
+
 argocd@argocd-server-5fff657769-fhml5:~$ argocd app list 
 NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
 
@@ -163,6 +164,10 @@ service/test-release   ClusterIP   10.108.2.95   <none>        4444/TCP �
 ```
 
 
-rozwiązanie to mimo że proste i działa od ręki to jednak jest skrajnie niedoskonałe - po pierwsze zakłada że repo z helm-chart należy do nas i możemy sobie do niego wrzucać swoje pliki (a tak może nie być, może go utrzymywać zupełnie inna osoba/grupa/firma/community) , po drugie burzy ideę BuildShipRun gdzie artefakt ma być generyczny i pozbawiony konfiguracji która to konfiguracja jest różna dla prod/test/dev oraz dogrywana podczas release na dev czy na prod, po trzecie uniemożliwia jakąkolwiek separację danych między PROD a resztą niższych środowisk , może np. dojść do sytuacji że developer robiący jakieś swoje poc na dev wrzuci omyłkowo coś do prod itd itp - rozwiązanie to zatem kompletnie odpada 
+rozwiązanie to mimo że proste i działa od ręki to jednak jest skrajnie niedoskonałe:
+- po pierwsze zakłada że repo z helm-chart należy do nas i możemy sobie do niego wrzucać swoje pliki (a tak może nie być, może go utrzymywać zupełnie inna osoba/grupa/firma/community)
+- po drugie burzy ideę BuildShipRun gdzie artefakt ma być generyczny i pozbawiony konfiguracji która to konfiguracja jest różna dla prod/test/dev oraz dogrywana podczas release na dev czy na prod
+- po trzecie uniemożliwia jakąkolwiek separację danych między PROD a resztą niższych środowisk , może np. dojść do sytuacji że developer robiący jakieś swoje poc na dev wrzuci omyłkowo coś do prod itd itp 
+
 
 
