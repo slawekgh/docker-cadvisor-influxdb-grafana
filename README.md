@@ -1,6 +1,9 @@
 oto proste repozytorium helma typu all-in-one - zawiera i helm-chart i values :https://github.com/slawekgh/argo-helm/tree/main/test-chart
 
-sam helm-chart to k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates + tester + z racji tego że to all-in-one również values.yaml 
+sam helm-chart to k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates 
++ tester + z racji tego że to all-in-one również values.yaml 
+
+```
 ├── Chart.yaml
 ├── templates
 │   ├── configmap.yaml
@@ -10,6 +13,8 @@ sam helm-chart to k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates�
 │   └── tests
 │       └── test-connection.yaml
 └── values.yaml
+```
+
 
 Zadanie polega na podziale frameworku opartego o tandem argocd+helm na środowiska DEV, TEST i PROD i zrobienie emulacji BuildShipRun na tymże tandemie (czyli jeden helm-chart ale wdrażany wielokrotnie , za każdym razem inaczej i bazujący za każdym razem na innych wartościach w helmowym values.yaml) 
 
@@ -25,3 +30,9 @@ Jednym słowem dążymy do modelu gdzie helm-chart jest jeden ale ma 3 różne m
 
 #pierwsze rozwiązanie - 1 repo z helm-chart a w nim 3 x values
 pierwsze intuicyjne (ale bardzo słabe) rozwiązanie jakie przychodzi do głowy to oczywiście dodać do repo 3 x plik Values i zdefiniować 3 aplikacje argo:
+
+# raz
+
+## dwa 
+
+### trzy
