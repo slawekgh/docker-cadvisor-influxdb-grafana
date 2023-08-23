@@ -494,15 +494,26 @@ jednym słowem konfiguracja środowiska jest trzymana w konfiguracji argo-app - 
 dodatkowo w materiałach na YT jako wadę tego podejścia wskazuje się brak możliwości wywołania lokalnego helm install/upgrade (no bo values mamy w argo a nie w repo czy pod ręką w pliku) 
 
 
-## piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig
+## piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart, drugie na konfig
 
-rozwiązanie z umbrella-chart było prawie idealne gdyby nie było konieczności robienia prawdziwego helm-repository (opartego o serwujący pliki webserwer czy GCS itp) gdzie trafiają TGZy z chartami oraz trzeba generować index.yaml rozwiązanie ze zmiennymi nadpisywanymi przez argo-aplikacje też byłoby ok gdyby nie konieczność trzymania całego konfigu aplikacji w obiektachh argo (które nie do tego są)
+rozwiązanie z umbrella-chart było prawie idealne gdyby nie następujące cechy:
+- konieczność robienia prawdziwego helm-repository (opartego o serwujący pliki webserwer czy GCS itp) 
+- produkcja TGZ 
+- trzeba generować index.yaml 
+
+rozwiązanie ze zmiennymi nadpisywanymi przez argo-aplikacje też byłoby ok gdyby nie konieczność trzymania całego konfigu aplikacji w obiektachh argo (które nie do tego są)
+
+
 dlatego dobrym kompromisem wydaje się być model gdzie pozostajemy przy klasycznej koncepcji zwykłego repo kodu z głównym helm-chart ale dodawania do niego konfiguracji z innego repo 
-takie rozwiązanie jest ale jak na razie jest to rozwiązanie beta i weszło dopiero w ARGOCD 2.6 https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#helm-value-files-from-external-git-repository
-https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
 
+takie rozwiązanie jest ale jak na razie jest to rozwiązanie beta i weszło dopiero w ARGOCD 2.6:
+```
+https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#helm-value-files-from-external-git-repository
+https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
+```
 tu kluczowy fragment:
-before v2.6 of Argo CD, Values files must be in the same git repository as the Helm chart. The files can be in a different location in which case it can be accessed using a relative path relative to the root directory of the Helm chart. As of v2.6, values files can be sourced from a separate repository than the Helm chart by taking advantage of multiple sources for Applications.
+_before v2.6 of Argo CD, Values files must be in the same git repository as the Helm chart. The files can be in a different location in which case it can be accessed using a relative path relative to the root directory of the Helm chart. As of v2.6, values files can be sourced from a separate repository than the Helm chart by taking advantage of multiple sources for Applications._
+
 
 poza tym (być może z racji że to beta) mimo kilku prób nie udało mi się wykonać takiego setupu via argocd app create a jedynie definiując w YAMLu obiekty argo-Application - przynajmniej tak jest na dzień 23.08.2023 lub po prostu nie znalazłem na szybko sposobu 
 
