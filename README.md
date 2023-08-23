@@ -607,4 +607,6 @@ od tej pory konfigurację środowiska trzymamy wyłącznie w repo z konfigiem i
 
 celem wprowadzenia tego samego setupu dla TEST i PROD należy stworzyć identyczne repozytoria konfiguracyjne oraz dodać kolejne 2 aplikacje argo wskazujące na te repozytoria 
 
+podejście 5te wydaje się być najlepsze a jedyną jego wadą jest to że jest to jeszcze beta 
+
 
