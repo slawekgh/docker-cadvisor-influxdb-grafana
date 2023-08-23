@@ -529,7 +529,7 @@ celujemy w setup:
 - jako repo konfugiracji dla środowiska DEV użyjemy repo: https://github.com/slawekgh/helm-argo-ship-dev
 
 
-oto struktura obydwu tych repo (pokazana w uproszczeniu , czyli z pominiętymi elementami które nie biorą udziały w tym setupie) :
+oto struktura obydwu tych repo (pokazana w uproszczeniu , czyli z pominiętymi elementami które nie biorą udziału w tym setupie) :
 ```
 helm-chart-repo$ tree
 .
@@ -560,13 +560,16 @@ argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo list
 TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
 argocd@argocd-server-85f85d648b-tf2bx:~$
 ```
-Trzeba dodać obiekt argo-aplikacji który pracuje na dwóch repozytoriach jednocześnie aby ułatwić sobie zadanie można w argo dodać z ręki prostą aplikację:
+Trzeba dodać obiekt argo-aplikacji który pracuje na dwóch repozytoriach jednocześnie 
+
+
+aby ułatwić sobie zadanie można w argo dodać z ręki prostą aplikację:
 ```
 argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml
 ```
 i potem zrobić jej edycję via ```kk -n argocd edit application argo-helm-dev```
 
-
+```
 # Please edit the object below. Lines beginning with a '#' will be ignored,
 # and an empty file will abort the edit. If an error occurs while saving this file will be
 # reopened with the relevant failures.
@@ -597,9 +600,11 @@ spec:
   syncPolicy:
     automated:
       prune: true
+```
 
 
 od tej pory konfigurację środowiska trzymamy wyłącznie w repo z konfigiem i zmiany (parametry) konfiguracyjne modyfikujemy wyłącznie w tym repo 
+
 celem wprowadzenia tego samego setupu dla TEST i PROD należy stworzyć identyczne repozytoria konfiguracyjne oraz dodać kolejne 2 aplikacje argo wskazujące na te repozytoria 
 
 
