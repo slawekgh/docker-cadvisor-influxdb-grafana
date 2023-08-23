@@ -8,14 +8,20 @@ BSR to w tym wypadku i w tym kontekście :
 
 
 
+
 Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts 
 
 
 
-oto proste repozytorium helma typu all-in-one - zawiera i helm-chart i values :https://github.com/slawekgh/argo-helm/tree/main/test-chart
+Oto proste repozytorium helma typu all-in-one - zawiera helm-chart + values:
+https://github.com/slawekgh/argo-helm/tree/main/test-chart
 
-sam helm-chart to k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates 
-+ tester + z racji tego że to all-in-one również values.yaml 
+
+sam helm-chart to:
+- k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates 
+- jest też tester
+- z racji tego że to all-in-one również values.yaml 
+
 
 ```
 ├── Chart.yaml
