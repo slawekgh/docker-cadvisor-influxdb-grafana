@@ -466,15 +466,30 @@ spec:
 ```
 
 oczywiście podobnie argo-app dla test i prod zawiera te parametry
-zalety - jest separacja środowisk PROD, DEV. TEST , jest też podział na część generyczną i część konfiguracyjną (czyli BuildShipRun jest w miarę spełniony) wady - trzymanie konfiguracji środowiska w parametrach argo-application , gdy zmiennych będą dziesiątki oczywiście raczej następujące podejście zupełnie się nie sprawdzi:
-argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=2 --helm-set servicePort=2222 --helm-set namespace=dev  --helm-set parametr1=xxx  --helm-set parametr2=xxx --helm-set parametr3=xxx --helm-set parametr4=xxx --helm-set parametr5=xxx --helm-set parametr6=xxx--helm-set parametr7=xxx  itd itd 
+<br>
 
-jak również nie sprawdzi sie zarządzanie zmianami w konfiguracji w ten sposób:
+zalety:
+- jest separacja środowisk PROD, DEV. TEST
+- jest też podział na część generyczną i część konfiguracyjną (czyli BuildShipRun jest w miarę spełniony) 
+
+wady 
+- trzymanie konfiguracji środowiska w parametrach argo-application
+- gdy zmiennych będą dziesiątki oczywiście raczej następujące podejście zupełnie się nie sprawdzi:
+```argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml --helm-set replicaCount=2 --helm-set servicePort=2222 --helm-set namespace=dev  --helm-set parametr1=xxx  --helm-set parametr2=xxx --helm-set parametr3=xxx --helm-set parametr4=xxx --helm-set parametr5=xxx --helm-set parametr6=xxx--helm-set parametr7=xxx  itd itd 
+```
+- również nie sprawdzi sie zarządzanie zmianami w konfiguracji w ten sposób:
+```
 $ argocd app set argo-helm-dev -p replicaCount=8 
 $ argocd app set argo-helm-dev -p replicaCount=9 -p servicePort=9999 -p parametr1=xxx itd 
+``` 
 
-wtedy jedyna opcja to zarządzanie argo-app z kodu , czyli trzymanie kodu argo-application dla dev, dla test i dla prod w repo i wgrywanie na klaster via kubectl apply -f (oczywiście via CICD, Jenkins lub inne argo-administracyjne-główne-nadrzędne) - wtedy pamiętać musimy że argo-application-dev.yaml zawiera już konfig dla DEV 
+jedyna opcja tutaj to zarządzanie argo-app z kodu , czyli trzymanie kodu argo-application dla dev, dla test i dla prod w repo i wgrywanie na klaster via kubectl apply -f (oczywiście via CICD, Jenkins lub inne argo-administracyjne-główne-nadrzędne)
+
+
+wtedy pamiętać musimy że argo-application-dev.yaml zawiera już konfig dla DEV 
+
 jednym słowem konfiguracja środowiska jest trzymana w konfiguracji argo-app - jest to słabe rozwiązanie 
+
 dodatkowo w materiałach na YT jako wadę tego podejścia wskazuje się brak możliwości wywołania lokalnego helm install/upgrade (no bo values mamy w argo a nie w repo czy pod ręką w pliku) 
 
 
