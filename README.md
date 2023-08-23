@@ -226,7 +226,10 @@ chart-repository$ tree
 └── test-chart-0.8.tgz
 ```
 
-trzeba jeszcze zmusić GitHuba żeby serwował pliki jak zwykły serwer HTTP - i tu z pomocą przychodzą ścieżki RAW jakie daje GitHuib - przykładowo :https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index.yaml
+trzeba jeszcze zmusić GitHuba żeby serwował pliki jak zwykły serwer HTTP - i tu z pomocą przychodzą ścieżki RAW jakie daje GitHuib - przykładowo:
+```
+https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index.yaml
+```
 
 a zatem komuś kto będzie chiał używać tego helm-repository taką ścieżkę trzeba będzie podawać: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main
 
