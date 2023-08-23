@@ -228,14 +228,20 @@ chart-repository$ tree
 
 trzeba jeszcze zmusić GitHuba żeby serwował pliki jak zwykły serwer HTTP - i tu z pomocą przychodzą ścieżki RAW jakie daje GitHuib - przykładowo :https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index.yaml
 
-a zatem taką ścieżkę trzeba będzie podawać komuś kto będzie chiał używać tego helm-repository:https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main
+a zatem komuś kto będzie chiał używać tego helm-repository taką ścieżkę trzeba będzie podawać: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main
 
-zaś w helm-chartach które będą się odwoływać do tego helm-repository trzeba będzie na końcu ich Chart.yaml podawać: dependencies:
+zaś w helm-chartach które będą się odwoływać do tego helm-repository trzeba będzie na końcu ich Chart.yaml podawać: i
+```
+dependencies:
 - name: test-chart
   version: 0.8
   repository: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/
  
+```
+
 pozostaje zatem w repo-ship-dev dodać takie dependency do Chart.yaml i sprawdzić via helm dependency update czy to się poprawnie przemieli
+
+```
 ship-repo-dev$ tree
 .
 ├── Chart.yaml
@@ -253,8 +259,12 @@ dependencies:
   version: 0.8
   repository: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/
 
+```
 
-pamiętając też o values - tutaj są nieco inaczej zdefiniowane gdyż sięgają (nadpisują) values z child-chartu - stąd musi być to tym razem w sekcji test-chart:ship-repo-dev$ cat values.yaml 
+pamiętając też o values - tutaj są nieco inaczej zdefiniowane gdyż sięgają (nadpisują) values z child-chartu - stąd musi być to tym razem w sekcji test-chart:
+
+```
+ship-repo-dev$ cat values.yaml 
 # Default values for test-chart
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -270,7 +280,7 @@ test-chart:
   obraz:
     image: gimboo/nginx_nonroot
     imagePolicy: Always
-
+```
 
 
 sprawdzamy czy to działa:
