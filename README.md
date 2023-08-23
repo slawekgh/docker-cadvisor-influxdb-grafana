@@ -191,29 +191,37 @@ https://github.com/slawekgh/helm-argo-ship-dev
 
 w repo tym jest tylko dependency (w Chart.yaml) i values.yaml dla DEV
 
+```
 ship-repo-dev$ tree
 ├── Chart.yaml
 ├── README.md
 └── values.yaml
+```
 
-w Chart.yaml ma być dependency i w nim trzeba się odwołać do centralnego repo chartów helma  
-głównym wyzwaniem tutaj będzie zrobienie na bazie naszego głównego repo nowego i prawidłowego repozytorium helmowego
+w Chart.yaml umieszczamy dependency i w nim trzeba się odwołać do centralnego repo chartów helma  
+
+głównym wyzwaniem tutaj będzie zrobienie na bazie naszego głównego repo nowego i prawidłowego repozytorium helmowego:
+
 https://dev.to/frosnerd/using-a-private-github-repository-as-a-helm-chart-repository-5fa8
 https://helm.sh/docs/topics/chart_repository/
 
 zakładamy nowe repo:
 https://github.com/slawekgh/argo-helm-chart-repository
 
-idąc za tym że:A chart repository is really just an HTTP server that hosts an index.yaml file together with a bunch of packaged charts in form of .tgz files.
+idąc za tym że:
+chart repository is really just an HTTP server that hosts an index.yaml file together with a bunch of packaged charts in form of .tgz files.
 
 trzeba zrobić TGZ oraz index.yaml 
 TGZ robimy via helm package test-chart
 INDEX.YAML via helm repo index .
 
-powstaje: chart-repository$ tree
+powstaje: 
+```
+chart-repository$ tree
 .
 ├── index.yaml
 └── test-chart-0.8.tgz
+```
 
 trzeba jeszcze zmusić GitHuba żeby serwował pliki jak zwykły serwer HTTP - i tu z pomocą przychodzą ścieżki RAW jakie daje GitHuib - przykładowo :https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index.yaml
 
