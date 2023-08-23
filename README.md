@@ -40,7 +40,7 @@ https://github.com/slawekgh/argo-helm/tree/main/test-chart
 sam helm-chart to:
 - k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates 
 - jest też tester
-- z racji tego że to all-in-one również values.yaml 
+- z racji tego że to all-in-one jest również values.yaml 
 
 
 ```
@@ -61,7 +61,8 @@ Zadanie polega na podziale frameworku opartego o tandem argocd+helm na środowis
 Trzeba zatem ten sam helm-chart wdrożyć oddzielnie dla DEV, dla TEST i dla PROD 
 
 Na potrzeby tego LAB będziemy używać jednego GKE i zrobimy podział na Namespaces dev, test i prod - z grubsza odpowiada to normalnemu podziałowi na 3 osobne GKE 
-tzw "różnice między środowiskami Dev, TEST i PROD" będą zaemulowane innymi portami k8s-svc i inną ilością replik (odpowiednio dla DEV : k8s-svc-port=2222 i 2repliki , dla TEST 3333+3repliki i dla PROD 4444+4r) 
+
+Tzw "różnice między środowiskami Dev, TEST i PROD" będą zaemulowane innymi portami k8s-svc i inną ilością replik (odpowiednio dla DEV : k8s-svc-port=2222 i 2repliki , dla TEST 3333+3repliki i dla PROD 4444+4r) 
 
 w rzeczywistych środowiskach różnice są inne i jest ich znacznie więcej - tzn. diff między helmowym values-dev.yaml a values-prod.yaml może liczyć kilkadziesiąt parametrów - tu dla nas nie ma to znaczenia bo nas interesuje mechanizm a nie zawartość
 
