@@ -1,3 +1,12 @@
+jak w nazwie repo - omawiamy tu próbę realizacji BuildShipRun dla tandemu argocd+helm 
+
+BSR to rozdział artefaktu generycznego od konfiguracji, artefakt generyczny ma być pozbawiony konfigiracji , konfiguracja per środowisko (prod, test, dev) ma być dostarczana wraz z release artefaktu. 
+
+
+przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane z helm-charts 
+
+
+
 oto proste repozytorium helma typu all-in-one - zawiera i helm-chart i values :https://github.com/slawekgh/argo-helm/tree/main/test-chart
 
 sam helm-chart to k8s-deployment , k8s-svc i k8s-cm zrobione w formie templates 
