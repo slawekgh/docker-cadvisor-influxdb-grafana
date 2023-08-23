@@ -15,7 +15,14 @@ Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane 
 - drugie rozwiązanie - 3 x repo z helm-chart
 - trzecie rozwiązanie - umbrella chart
 - czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
-- piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig\ 
+- piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig
+
+  
+  
+  
+  
+  
+
 
 Zaczynamy 
 
