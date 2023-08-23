@@ -264,7 +264,7 @@ dependencies:
 
 ```
 
-pamiętając też o values - tutaj są nieco inaczej zdefiniowane gdyż sięgają (nadpisują) values z child-chartu - stąd musi być to tym razem w sekcji test-chart:
+pamiętając też o values - tutaj są nieco inaczej zdefiniowane gdyż sięgają (nadpisują) values z child-chartu - stąd musi być to tym razem w sekcji test-chart (chodzi o to wcięcie dla jasnośc):
 
 ```
 ship-repo-dev$ cat values.yaml 
