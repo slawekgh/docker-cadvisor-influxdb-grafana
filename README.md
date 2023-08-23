@@ -169,5 +169,140 @@ rozwiązanie to mimo że proste i działa od ręki to jednak jest skrajnie niedo
 - po drugie burzy ideę BuildShipRun gdzie artefakt ma być generyczny i pozbawiony konfiguracji która to konfiguracja jest różna dla prod/test/dev oraz dogrywana podczas release na dev czy na prod
 - po trzecie uniemożliwia jakąkolwiek separację danych między PROD a resztą niższych środowisk , może np. dojść do sytuacji że developer robiący jakieś swoje poc na dev wrzuci omyłkowo coś do prod itd itp 
 
+<br>
+<br>
+<br>
+
+
+## drugie rozwiązanie - 3 x repo z helm-chart
+
+drugie rozwiązanie (również pozornie proste ale również pozbawione większego sensu) to skopiowanie chartu do 3 różnych repozytoriów
+
+od tej pory trzeba będzie utrzymywać zawartość chartu w jakiejś synchronizacji co spowoduje że po chwili i tak wszystko się rozjedzie i zamieni się to w 3 osobne produkty
+
+separacja między prod a nie-prod co prawda będzie ale BSR jest tu zupełnie nie zachowany i ryzyko różnic między PROD a środowiskami niższymi tak duże że rozwiązanie to raczej nie nadaje się do wdrożeń - a zatem nawet go nie będziemy tu modelować 
+
+
+## trzecie rozwiązanie - umbrella chart
+
+dodajemy kolejne repo (to repo będzie akurat shipem konfiguracyjnym dla środowiska DEV) które ma dependencies do centralnego repo z chartem :
+
+https://github.com/slawekgh/helm-argo-ship-dev
+
+w repo tym jest tylko dependency (w Chart.yaml) i values.yaml dla DEV
+
+ship-repo-dev$ tree
+├── Chart.yaml
+├── README.md
+└── values.yaml
+
+w Chart.yaml ma być dependency i w nim trzeba się odwołać do centralnego repo chartów helma  
+głównym wyzwaniem tutaj będzie zrobienie na bazie naszego głównego repo nowego i prawidłowego repozytorium helmowego
+https://dev.to/frosnerd/using-a-private-github-repository-as-a-helm-chart-repository-5fa8
+https://helm.sh/docs/topics/chart_repository/
+
+zakładamy nowe repo:
+https://github.com/slawekgh/argo-helm-chart-repository
+
+idąc za tym że:A chart repository is really just an HTTP server that hosts an index.yaml file together with a bunch of packaged charts in form of .tgz files.
+
+trzeba zrobić TGZ oraz index.yaml 
+TGZ robimy via helm package test-chart
+INDEX.YAML via helm repo index .
+
+powstaje: chart-repository$ tree
+.
+├── index.yaml
+└── test-chart-0.8.tgz
+
+trzeba jeszcze zmusić GitHuba żeby serwował pliki jak zwykły serwer HTTP - i tu z pomocą przychodzą ścieżki RAW jakie daje GitHuib - przykładowo :https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/index.yaml
+
+a zatem taką ścieżkę trzeba będzie podawać komuś kto będzie chiał używać tego helm-repository:https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main
+
+zaś w helm-chartach które będą się odwoływać do tego helm-repository trzeba będzie na końcu ich Chart.yaml podawać: dependencies:
+- name: test-chart
+  version: 0.8
+  repository: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/
+ 
+pozostaje zatem w repo-ship-dev dodać takie dependency do Chart.yaml i sprawdzić via helm dependency update czy to się poprawnie przemieli
+ship-repo-dev$ tree
+.
+├── Chart.yaml
+├── README.md
+└── values.yaml
+
+ship-repo-dev$ cat Chart.yaml 
+apiVersion: v2
+name: dev-chart
+type: application
+version: 1.12
+appVersion: "3.6"
+dependencies:
+- name: test-chart
+  version: 0.8
+  repository: https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/
+
+
+pamiętając też o values - tutaj są nieco inaczej zdefiniowane gdyż sięgają (nadpisują) values z child-chartu - stąd musi być to tym razem w sekcji test-chart:ship-repo-dev$ cat values.yaml 
+# Default values for test-chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+test-chart:
+  replicaCount: 2
+  testerPodName: tester
+  namespace: dev
+  label: testlabel
+  ala: alamakota
+  servicePort : 2222
+  PROTO : TCP
+  targetPort : 8080
+  obraz:
+    image: gimboo/nginx_nonroot
+    imagePolicy: Always
+
+
+
+sprawdzamy czy to działa:
+ship-repo-dev$ helm dependency update
+Getting updates for unmanaged Helm repositories...
+...Successfully got an update from the "https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/" chart repository
+Saving 1 charts
+Downloading test-chart from repo https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/
+Deleting outdated charts
+
+ship-repo-dev$ tree
+.
+├── Chart.lock
+├── charts
+│   └── test-chart-0.8.tgz
+├── Chart.yaml
+├── README.md
+└── values.yaml
+
+jak widać lokalnie (bez argo) się zrobiło - coś ściągnął więc jak widać działa to poprawnie 
+teraz dodajemy to do argo 
+argocd@argocd-server-5fff657769-fhml5:~$ argocd app list
+NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
+(czysto i pusto)
+argocd@argocd-server-5fff657769-fhml5:~$ argocd app create argo-helm-dev --repo https://github.com/slawekgh/helm-argo-ship-dev --path . --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values.yaml 
+application 'argo-helm-dev' created
+
+argocd@argocd-server-5fff657769-fhml5:~$ argocd app list 
+NAME                  CLUSTER                         NAMESPACE  PROJECT  STATUS  HEALTH   SYNCPOLICY  CONDITIONS  REPO                                            PATH  TARGET
+argocd/argo-helm-dev  https://kubernetes.default.svc  dev        default  Synced  Healthy  Auto-Prune  <none>      https://github.com/slawekgh/helm-argo-ship-dev  .  
+na klastrze argo wykonało założenia  
+$ kk get po -n dev 
+NAME                                  READY   STATUS    RESTARTS   AGE
+test-release-deploy-7c9c7669c-6cbqc   1/1     Running   0          69s
+test-release-deploy-7c9c7669c-vnxh9   1/1     Running   0          69s
+
+analogicznie obok repo-ship-dev (https://github.com/slawekgh/helm-argo-ship-dev) należy założyć identyczne osobne repo dla test i osobne dla prod 
+ich struktura będzie taka sama - mają tu być tylko dependency (w Chart.yaml) do helm-repository i values.yaml odpowiednie dla TEST i dla PROD 
+ship-repo-dev$ tree
+├── Chart.yaml
+├── README.md
+└── values.yaml
+
+czy rozwiązanie z umbrella-chart ma sens ? ogólnie tak, ale trzeba mu niestety dostarczyć "prawdziwe helm-repository" - czyli zamiast trzymać główny helm-chart w kodzie trzeba go za każdym razem pakować do TGZ i generować index.yaml , dodatkowo potrzebny jest web-serwer do serwowania tych plików.Jednym słowem idea wydaje się być dobra (jest separacja, jest BuildShipRun), niestety realizacja koncepcji jest nieco utrudniona i nieelastyczna 
 
 
