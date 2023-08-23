@@ -23,18 +23,7 @@ Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane 
 
 
 
-\
-\
-\
-\
-\
-\
-
-
-
-
-
-Zaczynamy 
+\ \ \ \ \ \ Zaczynamy 
 
 
 Oto proste repozytorium helma typu all-in-one - zawiera helm-chart + values:
