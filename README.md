@@ -16,19 +16,11 @@ Przedstawione jest 5 podejść do proby realizacji tego via argocd zintegrowane 
 - trzecie rozwiązanie - umbrella chart
 - czwarte rozwiązanie - zmienne nadpisywane przez argo-aplikacje
 - piate rozwiązanie - 2 osobne repozytoria - jedno na helm-chart drugie na konfig  
-
-
   
 <br>  
 <br>  
 <br>  
 <br>  
-<br>  
-<br>  
-  
-  
-  
-
 
 Zaczynamy 
 
@@ -76,3 +68,4 @@ pierwsze intuicyjne (ale bardzo słabe) rozwiązanie jakie przychodzi do głowy
 ## dwa 
 
 ### trzy
+# bsr-argocd-helm
