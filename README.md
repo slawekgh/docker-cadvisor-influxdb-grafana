@@ -516,15 +516,21 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
 
 
 tu kluczowy fragment:
+<br>
+
 _before v2.6 of Argo CD, Values files must be in the same git repository as the Helm chart. The files can be in a different location in which case it can be accessed using a relative path relative to the root directory of the Helm chart. As of v2.6, values files can be sourced from a separate repository than the Helm chart by taking advantage of multiple sources for Applications._
 
 
 poza tym (być może z racji że to beta) mimo kilku prób nie udało mi się wykonać takiego setupu via argocd app create a jedynie definiując w YAMLu obiekty argo-Application - przynajmniej tak jest na dzień 23.08.2023 lub po prostu nie znalazłem na szybko sposobu 
 
-celujemy w setup:jako repo główne (repo helm-chartu) uzyjemy https://github.com/slawekgh/argo-helm/tree/main/test-chart
-jako repo konfugiracji dla środowiska DEV użyjemy repo: https://github.com/slawekgh/helm-argo-ship-dev
-oto struktura obydwu tych repo (pokazana w uproszczeniu , czyli z pominiętymi elementami które nie biorą udziały w tym setupie) :
+celujemy w setup:
 
+- jako repo główne (repo helm-chartu) uzyjemy https://github.com/slawekgh/argo-helm/tree/main/test-chart
+- jako repo konfugiracji dla środowiska DEV użyjemy repo: https://github.com/slawekgh/helm-argo-ship-dev
+
+
+oto struktura obydwu tych repo (pokazana w uproszczeniu , czyli z pominiętymi elementami które nie biorą udziały w tym setupie) :
+```
 helm-chart-repo$ tree
 .
 ├── README.md
@@ -543,20 +549,22 @@ ship-repo-dev$ tree
 .
 ├── README.md
 └── values-dla-srodowiska-dev.yaml
-
+```
 
 w ARGO mamy czystą sytuację:
+
+```
 argocd@argocd-server-85f85d648b-tf2bx:~$ argocd app list
 NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
 argocd@argocd-server-85f85d648b-tf2bx:~$ argocd repo list
 TYPE  NAME  REPO  INSECURE  OCI  LFS  CREDS  STATUS  MESSAGE  PROJECT
 argocd@argocd-server-85f85d648b-tf2bx:~$
-
+```
 Trzeba dodać obiekt argo-aplikacji który pracuje na dwóch repozytoriach jednocześnie aby ułatwić sobie zadanie można w argo dodać z ręki prostą aplikację:
-
+```
 argocd app create argo-helm-dev --repo https://github.com/slawekgh/argo-helm --path test-chart --dest-namespace dev --dest-server https://kubernetes.default.svc --auto-prune --sync-policy automated --release-name test-release --values values-generic.yaml
-
-i potem zrobić jej edycję via kk -n argocd edit application argo-helm-dev
+```
+i potem zrobić jej edycję via ```kk -n argocd edit application argo-helm-dev```
 
 
 # Please edit the object below. Lines beginning with a '#' will be ignored,
