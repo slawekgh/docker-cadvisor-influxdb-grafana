@@ -287,6 +287,8 @@ test-chart:
 
 
 sprawdzamy czy to działa:
+
+```
 ship-repo-dev$ helm dependency update
 Getting updates for unmanaged Helm repositories...
 ...Successfully got an update from the "https://raw.githubusercontent.com/slawekgh/argo-helm-chart-repository/main/" chart repository
@@ -302,9 +304,13 @@ ship-repo-dev$ tree
 ├── Chart.yaml
 ├── README.md
 └── values.yaml
+```
 
 jak widać lokalnie (bez argo) się zrobiło - coś ściągnął więc jak widać działa to poprawnie 
+
 teraz dodajemy to do argo 
+
+```
 argocd@argocd-server-5fff657769-fhml5:~$ argocd app list
 NAME  CLUSTER  NAMESPACE  PROJECT  STATUS  HEALTH  SYNCPOLICY  CONDITIONS  REPO  PATH  TARGET
 (czysto i pusto)
@@ -319,6 +325,8 @@ $ kk get po -n dev
 NAME                                  READY   STATUS    RESTARTS   AGE
 test-release-deploy-7c9c7669c-6cbqc   1/1     Running   0          69s
 test-release-deploy-7c9c7669c-vnxh9   1/1     Running   0          69s
+```
+
 
 analogicznie obok repo-ship-dev (https://github.com/slawekgh/helm-argo-ship-dev) należy założyć identyczne osobne repo dla test i osobne dla prod 
 ich struktura będzie taka sama - mają tu być tylko dependency (w Chart.yaml) do helm-repository i values.yaml odpowiednie dla TEST i dla PROD 
