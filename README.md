@@ -210,7 +210,7 @@ https://github.com/slawekgh/argo-helm-chart-repository
 
 idąc za tym że:
 
-_chart repository is really just an HTTP server that hosts an index.yaml file together with a bunch of packaged charts in form of .tgz files.-
+_chart repository is really just an HTTP server that hosts an index.yaml file together with a bunch of packaged charts in form of .tgz files._
 
 trzeba zrobić TGZ oraz index.yaml 
 
